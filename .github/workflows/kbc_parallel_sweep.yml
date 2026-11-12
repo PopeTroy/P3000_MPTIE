@@ -1,0 +1,17 @@
+name: Kage Bunshin Parallel Sweep (1 CE - 3000 CE)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  distributed-sweep:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        diamond: [antiquity, medieval, industrial, digital, post_singularity]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Sharded Causal Diamond Processing
+        run: |
+          cargo test --release --lib -- --ignored kbc_shard_${{ matrix.diamond }}
