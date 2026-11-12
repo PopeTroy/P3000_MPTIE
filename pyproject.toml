@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "p3000-mptie"
+version = "1.0.0"
+description = "Massively Parallel Temporal Inference Engine (MPTIE)"
+authors = ["Pope Troy <info@celsiustechmediagroup.co.za>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.2.0"
+ray = "^2.9.0"
+pydantic = "^2.0"
+requests = "^2.31.0"
+mpi4py = "^3.1.4"
+pynvml = "^11.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
