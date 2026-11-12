@@ -1,0 +1,27 @@
+name: P3000 NIM Multi-Modal Inference Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  nim-embedding-sync:
+    runs-on: ubuntu-latest
+    container:
+      image: nvcr.io/nim/meta/llama3-70b-instruct:latest
+      options: --gpus all --ipc=host
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Initialize NVIDIA NIM Endpoints
+        env:
+          NGC_API_KEY: ${{ secrets.NGC_API_KEY }}
+        run: |
+          echo "Starting NIM Microservice container for Corpus_3000 multi-modal embedding..."
+          python3 src/temporal_ingestion/nim_client.py --mode health-check
+
+      - name: Execute $k=0.666$ Latent Projection
+        run: |
+          python3 src/temporal_ingestion/chronos_parser.py --target-manifold M_k --k-coeff 0.666
