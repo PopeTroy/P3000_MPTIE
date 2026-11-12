@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "src/manifold_core"
+]
+resolver = "2"
+
+[package]
+name = "p3000_mptie"
+version = "1.0.0"
+edition = "2024"
+authors = ["Pope Troy <info@celsiustechmediagroup.co.za>"]
+description = "Massively Parallel Temporal Inference Engine (MPTIE) - UESP/PRCE Resolution Protocol"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+nalgebra = "0.33"
+rayon = "1.10"
