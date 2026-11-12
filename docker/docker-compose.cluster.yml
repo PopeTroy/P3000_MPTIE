@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  nim-core:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.nim_worker
+    container_name: p3000_nim_core
+    ports:
+      - "8000:8000"
+    environment:
+      - NGC_API_KEY=${NGC_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - p3000_net
+
+  kurama-worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.kurama
+    container_name: p3000_kurama_worker
+    volumes:
+      - ../:/workspace
+    depends_on:
+      - nim-core
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, compute]
+    networks:
+      - p3000_net
+
+networks:
+  p3000_net:
+    driver: bridge
