@@ -1,0 +1,20 @@
+name: TRL9 Operational Coherence Verification
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  verify-trl9:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Rust Environment
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Run Anomaly Drift & Invariant Checks
+        run: |
+          cargo test --release --test trl9_gate_validation
