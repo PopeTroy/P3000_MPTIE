@@ -1,0 +1,9 @@
+FROM nvcr.io/nim/meta/llama3-70b-instruct:latest
+
+WORKDIR /app
+
+COPY src/temporal_ingestion/nim_client.py /app/
+
+EXPOSE 8000
+
+CMD ["python3", "nim_client.py"]
