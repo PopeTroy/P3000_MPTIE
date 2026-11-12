@@ -3,6 +3,10 @@ name = "manifold_core"
 version = "1.0.0"
 edition = "2024"
 
+[lib]
+name = "manifold_core"
+path = "embedding_k666.rs" # Or update path depending on your entry point, or use default src/lib.rs structure
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 nalgebra = "0.33"
