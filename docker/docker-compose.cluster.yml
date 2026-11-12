@@ -27,6 +27,8 @@ services:
     container_name: p3000_kurama_worker
     volumes:
       - ../:/workspace
+    environment:
+      - NGC_API_KEY=${NGC_API_KEY}
     depends_on:
       - nim-core
     deploy:
