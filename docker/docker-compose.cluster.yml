@@ -1,15 +1,17 @@
 version: '3.8'
 
 services:
-  nim-core:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.nim_worker
-    container_name: p3000_nim_core
+  # --- NEMOTRON EMBEDDING / REASONING WORKERS (Instances 1 - 5) ---
+  nemotron-worker-1:
+    image: nvcr.io/nim/nvidia/nemotron-3.5-flash:latest
+    container_name: p3000_nemotron_1
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       - NGC_API_KEY=${NGC_API_KEY}
+      - NIM_ENGINE_MODEL_DOWNLOAD_PROVIDER=ngc
+    volumes:
+      - ~/.cache/nim:/opt/nim/.cache
     deploy:
       resources:
         reservations:
@@ -20,6 +22,66 @@ services:
     networks:
       - p3000_net
 
+  nemotron-worker-2:
+    image: nvcr.io/nim/nvidia/nemotron-3.5-flash:latest
+    container_name: p3000_nemotron_2
+    ports:
+      - "8002:8000"
+    environment:
+      - NGC_API_KEY=${NGC_API_KEY}
+      - NIM_ENGINE_MODEL_DOWNLOAD_PROVIDER=ngc
+    volumes:
+      - ~/.cache/nim:/opt/nim/.cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - p3000_net
+
+  # --- PARAKEET ASR / SPEECH WORKERS (Instances 6 - 10) ---
+  parakeet-worker-1:
+    image: nvcr.io/nim/nvidia/parakeet-ctc-1.1b-asr:1.0.0
+    container_name: p3000_parakeet_1
+    ports:
+      - "50051:50051"
+    environment:
+      - NGC_API_KEY=${NGC_API_KEY}
+    volumes:
+      - ~/.cache/nim:/home/nvs/.cache/nim
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - p3000_net
+
+  parakeet-worker-2:
+    image: nvcr.io/nim/nvidia/parakeet-ctc-1.1b-asr:1.0.0
+    container_name: p3000_parakeet_2
+    ports:
+      - "50052:50051"
+    environment:
+      - NGC_API_KEY=${NGC_API_KEY}
+    volumes:
+      - ~/.cache/nim:/home/nvs/.cache/nim
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - p3000_net
+
+  # --- KURAMA ORCHESTRATOR WORKER ---
   kurama-worker:
     build:
       context: ..
@@ -30,7 +92,8 @@ services:
     environment:
       - NGC_API_KEY=${NGC_API_KEY}
     depends_on:
-      - nim-core
+      - nemotron-worker-1
+      - parakeet-worker-1
     deploy:
       resources:
         reservations:
