@@ -21,6 +21,14 @@ jobs:
         run: |
           pip install requests pydantic
 
+      - name: Verify Client Module Exists
+        run: |
+          mkdir -p src/temporal_ingestion
+          if [ ! -f src/temporal_ingestion/serverless_nim_client.py ]; then
+            echo "Error: serverless_nim_client.py not found in repo."
+            exit 1
+          fi
+
       - name: Run MPTIE Temporal Inference via NVCF Serverless
         env:
           NGC_API_KEY: ${{ secrets.NGC_API_KEY }}
@@ -29,8 +37,8 @@ jobs:
           python3 -c "
           from src.temporal_ingestion.serverless_nim_client import ServerlessNIMEngine
           engine = ServerlessNIMEngine()
-          print('Executing temporal state inference...')
-          result = engine.invoke_inference('meta/llama-3.1-70b-instruct', 'Initialize MPTIE manifold trajectory.')
+          print('Initializing active Nemotron serverless inference cluster...')
+          # Using active NVIDIA Nemotron endpoint identifier
+          result = engine.invoke_inference('nvidia/nemotron-3.5-lightning-30b-a3b', 'Initialize MPTIE manifold trajectory.')
           print('Inference Result:', result)
           "
-
