@@ -1,37 +1,26 @@
 import os
 import requests
+import json
 
-class NIMMicroserviceClient:
-    def __init__(self, endpoint: str = "http://localhost:8000/v1", mode: str = "production"):
-        self.endpoint = endpoint
-        self.api_key = os.getenv("NGC_API_KEY", "mock_ngc_key")
-        self.headers = {
+class ServerlessNIMEngine:
+    def __init__(self):
+        self.endpoint = "https://integrate.api.nvidia.com/v1/chat/completions"
+        self.api_key = os.environ.get("NGC_API_KEY", "")
+
+    def invoke_inference(self, model_name: str, prompt: str):
+        headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
-        self.mode = mode
-
-    def health_check(self) -> bool:
-        print(f"[NIM CLIENT] Running health check against {self.endpoint}...")
-        return True
-
-    def query_embedding(self, historical_corpus_chunk: str) -> list[float]:
-        if self.mode == "health-check":
-            return [0.0] * 4096
-        
         payload = {
-            "model": "meta/llama3-70b-instruct",
-            "prompt": f"Compress temporal state manifold vector (k=0.666): {historical_corpus_chunk}",
-            "max_tokens": 1024,
-            "temperature": 0.1
+            "model": model_name,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 100,
+            "temperature": 0.3
         }
-        response = requests.post(f"{self.endpoint}/completions", headers=self.headers, json=payload)
-        if response.status_code == 200:
-            return response.json().get("data", [0.0]*4096)
-        else:
-            raise RuntimeError(f"NIM Microservice error: {response.text}")
 
-if __name__ == "__main__":
-    client = NIMMicroserviceClient(mode="health-check")
-    assert client.health_check()
-    print("[NIM CLIENT] NIM Microservices API Integration verified successfully.")
+        response = requests.post(self.endpoint, headers=headers, json=payload)
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            raise RuntimeError(f"NVCF Serverless Error [{response.status_code}]: {response.text}")
