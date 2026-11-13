@@ -12,7 +12,7 @@ class ServerlessNIMEngine:
             "Content-Type": "application/json"
         }
         payload = {
-            "model": model_name,
+            "model": model_name,  # Using active model IDs like nvidia/nemotron-3.5-lightning-30b-a3b
             "messages": [{"role": "user", "content": prompt}],
             "max_tokens": 100,
             "temperature": 0.3
@@ -23,4 +23,3 @@ class ServerlessNIMEngine:
             return response.json()['choices'][0]['message']['content']
         else:
             raise RuntimeError(f"NVCF Serverless Error [{response.status_code}]: {response.text}")
-          
