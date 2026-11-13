@@ -1,0 +1,36 @@
+name: P3000 MPTIE Serverless Execution
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  execute-inference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests pydantic
+
+      - name: Run MPTIE Temporal Inference via NVCF Serverless
+        env:
+          NGC_API_KEY: ${{ secrets.NGC_API_KEY }}
+        run: |
+          python3 -c "
+          import os
+          from src.temporal_ingestion.serverless_nim_client import ServerlessNIMEngine
+          engine = ServerlessNIMEngine()
+          print('Executing temporal state inference...')
+          # Calls Nemotron / Llama via NVIDIA Cloud Functions
+          result = engine.invoke_inference('meta/llama-3.1-70b-instruct', 'Initialize MPTIE manifold trajectory.')
+          print('Inference Result:', result)
+          "
