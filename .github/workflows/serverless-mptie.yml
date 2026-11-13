@@ -24,13 +24,13 @@ jobs:
       - name: Run MPTIE Temporal Inference via NVCF Serverless
         env:
           NGC_API_KEY: ${{ secrets.NGC_API_KEY }}
+          PYTHONPATH: .
         run: |
           python3 -c "
-          import os
           from src.temporal_ingestion.serverless_nim_client import ServerlessNIMEngine
           engine = ServerlessNIMEngine()
           print('Executing temporal state inference...')
-          # Calls Nemotron / Llama via NVIDIA Cloud Functions
           result = engine.invoke_inference('meta/llama-3.1-70b-instruct', 'Initialize MPTIE manifold trajectory.')
           print('Inference Result:', result)
           "
+
