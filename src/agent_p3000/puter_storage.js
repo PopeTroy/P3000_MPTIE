@@ -1,66 +1,33 @@
-// Puter.fs Sovereign Storage Wrapper for P3000_MPTIE
-// Operates using puter.fs primitives for manifold state and artifact management
-
-class PuterStorageEngine {
-    constructor() {
-        this.active = typeof puter !== 'undefined' && puter.fs;
+// Puter.fs Sovereign File Operations Wrapper
+class PuterSovereignFS {
+    static async initializeManifoldDirectory() {
+        await puter.fs.mkdir("/p3000_manifolds", { recursive: true });
+        console.log("[PUTER.FS] Sovereign directory structured: /p3000_manifolds");
     }
 
-    async writeFile(path, data) {
-        if (!this.active) throw new Error("Puter.fs context not initialized.");
-        try {
-            await puter.fs.write(path, data);
-            console.log(`[PUTER.FS] Successfully wrote artifact to ${path}`);
-        } catch (err) {
-            console.error(`[PUTER.FS] Write failed for ${path}:`, err);
-            throw err;
-        }
+    static async persistState(slotId, statePacket) {
+        const path = `/p3000_manifolds/worker_${slotId}_state.json`;
+        await puter.fs.write(path, JSON.stringify(statePacket, null, 2));
+        console.log(`[PUTER.FS] State checkpoint written to ${path}`);
     }
 
-    async readFile(path) {
-        if (!this.active) throw new Error("Puter.fs context not initialized.");
-        try {
-            const content = await puter.fs.read(path);
-            return content;
-        } catch (err) {
-            console.error(`[PUTER.FS] Read failed for ${path}:`, err);
-            throw err;
-        }
+    static async inspectState(slotId) {
+        const path = `/p3000_manifolds/worker_${slotId}_state.json`;
+        const stats = await puter.fs.stat(path);
+        const content = await puter.fs.read(path);
+        return { stats, content: JSON.parse(content) };
     }
 
-    async makeDirectory(path) {
-        if (!this.active) throw new Error("Puter.fs context not initialized.");
-        try {
-            await puter.fs.mkdir(path, { recursive: true });
-            console.log(`[PUTER.FS] Directory structured at ${path}`);
-        } catch (err) {
-            console.error(`[PUTER.FS] Mkdir failed for ${path}:`, err);
-            throw err;
-        }
+    static async cloneCheckpoint(sourceId, targetId) {
+        const src = `/p3000_manifolds/worker_${sourceId}_state.json`;
+        const dest = `/p3000_manifolds/worker_${targetId}_state.json`;
+        await puter.fs.copy(src, dest);
+        console.log(`[PUTER.FS] Cloned checkpoint from slot ${sourceId} to ${targetId}`);
     }
 
-    async getStat(path) {
-        if (!this.active) throw new Error("Puter.fs context not initialized.");
-        return await puter.fs.stat(path);
-    }
-
-    async deleteItem(path) {
-        if (!this.active) throw new Error("Puter.fs context not initialized.");
+    static async purgeCheckpoint(slotId) {
+        const path = `/p3000_manifolds/worker_${slotId}_state.json`;
         await puter.fs.delete(path);
-        console.log(`[PUTER.FS] Purged path: ${path}`);
-    }
-
-    async copyItem(source, destination) {
-        if (!this.active) throw new Error("Puter.fs context not initialized.");
-        await puter.fs.copy(source, destination);
-        console.log(`[PUTER.FS] Cloned manifold asset from ${source} to ${destination}`);
-    }
-
-    async pasteItem(source, destinationDir) {
-        if (!this.active) throw new Error("Puter.fs context not initialized.");
-        await puter.fs.paste(source, destinationDir);
-        console.log(`[PUTER.FS] Pasted asset ${source} into ${destinationDir}`);
+        console.log(`[PUTER.FS] Purged checkpoint for slot ${slotId}`);
     }
 }
-
-export const storageEngine = new PuterStorageEngine();
