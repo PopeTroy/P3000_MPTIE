@@ -1,4 +1,4 @@
-FROM nvcr.io/nim/meta/llama3-70b-instruct:latest
+FROM nvcr.io/nim/meta/llama-3-70b-instruct:latest
 
 WORKDIR /app
 
